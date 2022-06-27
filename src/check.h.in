@@ -494,7 +494,11 @@ static void __testname ## _fn (int _i CK_ATTRIBUTE_UNUSED)
  */
 #define fail_if(expr, ...)\
   (expr) ? \
+  <<<<<<< fail_if-no-args
+     _ck_assert_failed_ignore_printf_validation(__FILE__, __LINE__, "Failure '"#expr"' occurred" , ## __VA_ARGS__) \
+  =======
      _ck_assert_failed(__FILE__, __LINE__, "Failure '"#expr"' occurred" , ## __VA_ARGS__, NULL) \
+  >>>>>>> pre-0.15.2
      : _mark_point(__FILE__, __LINE__)
 
 /*
@@ -515,11 +519,25 @@ static void __testname ## _fn (int _i CK_ATTRIBUTE_UNUSED)
 #if @HAVE_FORK@
 CK_DLL_EXP void CK_EXPORT _ck_assert_failed(const char *file, int line,
                                             const char *expr, const char *msg,
+  <<<<<<< fail_if-no-args
+                                            ...) CK_ATTRIBUTE_NORETURN CK_ATTRIBUTE_FORMAT(printf, 4, 5);
+CK_DLL_EXP void CK_EXPORT _ck_assert_failed_ignore_printf_validation(const char *file, int line,
+                                            const char *expr, const char *msg,
+                                            ...) CK_ATTRIBUTE_NORETURN;
+#else
+CK_DLL_EXP void CK_EXPORT _ck_assert_failed(const char *file, int line,
+                                            const char *expr, const char *msg,
+                                            ...) CK_ATTRIBUTE_FORMAT(printf, 4, 5);
+CK_DLL_EXP void CK_EXPORT _ck_assert_failed_ignore_printf_validation(const char *file, int line,
+                                            const char *expr, const char *msg,
+                                            ...);
+  =======
                                             ...) CK_ATTRIBUTE_NORETURN CK_ATTRIBUTE_FORMAT(CK_ATTRIBUTE_FORMAT_PRINTF, 4, 5);
 #else
 CK_DLL_EXP void CK_EXPORT _ck_assert_failed(const char *file, int line,
                                             const char *expr, const char *msg,
                                             ...) CK_ATTRIBUTE_FORMAT(CK_ATTRIBUTE_FORMAT_PRINTF, 4, 5);
+  >>>>>>> pre-0.15.2
 #endif
 
 /**
