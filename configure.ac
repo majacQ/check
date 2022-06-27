@@ -4,10 +4,10 @@
 # Prelude.
 AC_PREREQ([2.59])
 
-AC_INIT([Check], [0.11.0], [check-devel at lists dot sourceforge dot net])
+AC_INIT([Check], [0.15.2], [check-devel at lists dot sourceforge dot net])
 CHECK_MAJOR_VERSION=0
-CHECK_MINOR_VERSION=11
-CHECK_MICRO_VERSION=0
+CHECK_MINOR_VERSION=15
+CHECK_MICRO_VERSION=2
 CHECK_VERSION=$CHECK_MAJOR_VERSION.$CHECK_MINOR_VERSION.$CHECK_MICRO_VERSION
 
 # unique source file --- primitive safety check 
@@ -32,6 +32,11 @@ AC_SUBST(CHECK_MAJOR_VERSION)
 AC_SUBST(CHECK_MINOR_VERSION)
 AC_SUBST(CHECK_MICRO_VERSION)
 AC_SUBST(CHECK_VERSION)
+
+# The PROJECT_VERSION variable definition is required for
+# compatibility with the CMake configuration interface.
+#
+AC_SUBST([PROJECT_VERSION], $CHECK_VERSION)
 
 # Configure options.
 # allow `./configure --enable-silent-rules' and `make V=0'
@@ -71,6 +76,15 @@ AC_HELP_STRING([--enable-timeout-tests],
   no)  enable_timeout_tests=false ;;
   *)   AC_MSG_ERROR(bad value ${enableval} for --enable-timeout-tests) ;;
 esac], [enable_timeout_tests=true ])
+
+AC_ARG_ENABLE(build-docs,
+AC_HELP_STRING([--enable-build-docs],
+           [turn on building documentation @<:@default=yes@:>@]),
+[case "${enableval}" in
+  yes) enable_build_docs=true ;;
+  no)  enable_build_docs=false ;;
+  *)   AC_MSG_ERROR(bad value ${enableval} for --enable-build-docs) ;;
+esac], [enable_build_docs=true ])
 
 AM_CONDITIONAL(NO_TIMEOUT_TESTS, test x"$enable_timeout_tests" = "xfalse")
 
@@ -171,12 +185,19 @@ esac
 AC_CHECK_PROGS(GCOV, gcov, false)
 AC_CHECK_PROGS(LCOV, lcov, false)
 AC_CHECK_PROGS(GENHTML, genhtml, false)
-AC_CHECK_PROGS(TEX, tex, false)
-if test "$TEX" = "false"; then
-    # Make it [somewhat] clear to maintainers that tex is missing. Not an error
-    # though because 'make install' (which users need) does not build the docs
-    # anyway.
-    AC_MSG_WARN(tex not installed: cannot rebuild HTML documentation.)
+
+if test "xtrue" = x"$enable_build_docs"; then
+    AC_CHECK_PROGS(MAKEINFO, makeinfo, false)
+    if test "$MAKEINFO" = "false"; then
+        # Make it [somewhat] clear to maintainers that makeinfo is missing. Not an error
+        # though because 'make install' (which users need) does not build the docs
+        # anyway.
+        AC_MSG_WARN(makeinfo not installed: cannot rebuild HTML documentation.)
+    fi
+
+    AM_CONDITIONAL(MAKE_DOCS, [test x"$MAKEINFO" != "xfalse"])
+else
+   AM_CONDITIONAL(MAKE_DOCS, [false])
 fi
 AC_CHECK_PROGS(FILTERDIFF, filterdiff, false)
 if test "$FILTERDIFF" = "false"; then
@@ -187,6 +208,12 @@ if test "$FILTERDIFF" = "false"; then
 fi
 
 AM_CONDITIONAL(USE_FILTERDIFF, [test x"$FILTERDIFF" = x"filterdiff"])
+
+AC_CHECK_PROGS(GRAPHVIZ, dot, false)
+# If graphviz doesn't exist 'make doc/doxygen-devel' will skip rendering graphs
+# and inform the developer about it. This target is optional and it aims
+# developers of libcheck, not users.
+AM_CONDITIONAL(USE_GRAPHVIZ, [test x"$GRAPHVIZ" = x"dot"])
 
 # Checks for pthread implementation.
 ACX_PTHREAD
@@ -248,6 +275,16 @@ AM_CONDITIONAL(SUBUNIT, test x"$enable_subunit" != "xfalse")
 
 # Check for POSIX regular expressions support.
 AC_CHECK_HEADERS([regex.h], HAVE_REGEX_H=1, HAVE_REGEX_H=0)
+
+# Check if we have the windows headers for Init Once API
+AC_CHECK_HEADERS([windows.h], HAVE_WINDOWS_H=1, HAVE_WINDOWS_H=0)
+AC_SUBST(HAVE_WINDOWS_H)
+
+# Check if we have the One-Time Initialization API
+AC_CHECK_FUNCS([InitOnceBeginInitialize], HAVE_INIT_ONCE_BEGIN_INITIALIZE=1, HAVE_INIT_ONCE_BEGIN_INITIALIZE=0)
+AC_CHECK_FUNCS([InitOnceComplete], HAVE_INIT_ONCE_COMPLETE=1, HAVE_INIT_ONCE_COMPLETE=0)
+AC_SUBST(HAVE_INIT_ONCE_BEGIN_INITIALIZE)
+AC_SUBST(HAVE_INIT_ONCE_COMPLETE)
 
 if test "x$HAVE_REGEX_H" = "x1"; then
     AC_CHECK_FUNCS([regcomp regexec], HAVE_REGEX=1, HAVE_REGEX=0)
@@ -354,15 +391,22 @@ AS_IF([test "x$AWK_PATH" = 'x*NO AWK*'],
 # Output files
 AC_CONFIG_HEADERS([config.h])
 
-AC_CONFIG_FILES([check.pc
-                 Makefile
-                 checkmk/Makefile
-		 doc/Makefile
-		 lib/Makefile
-                 src/check.h
-                 src/Makefile
-                 tests/Makefile
-		 tests/test_vars])
+AC_CONFIG_FILES([
+    check.pc
+    Makefile
+    checkmk/Makefile
+    doc/Makefile
+    doc/man/Makefile
+    doc/man/man3/Makefile
+    doc/man/man3/suite_create.3
+    doc/man/man7/Makefile
+    doc/man/man7/libcheck.7
+    lib/Makefile
+    src/check.h
+    src/Makefile
+    tests/Makefile
+    tests/test_vars
+])
 
 AC_OUTPUT
 
@@ -426,5 +470,12 @@ else
     result="yes"
 fi
 echo "POSIX regular expressions ............ $result"
+
+if test "xtrue" = x"$enable_build_docs"; then
+    result="yes"
+else
+    result="no"
+fi
+echo "build docs ........................... $result"
 
 echo "=========================================="

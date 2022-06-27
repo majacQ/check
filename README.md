@@ -1,8 +1,20 @@
-# About Check
+<div align="center">
 
-[![Travis Build Status](https://travis-ci.org/libcheck/check.svg?branch=master)](https://travis-ci.org/libcheck/check)
-[![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/github/libcheck/check?svg=true)](https://ci.appveyor.com/project/libcheck/check/branch/master)
+# Check
 
+[![Linux Build Status](https://github.com/libcheck/check/workflows/linux/badge.svg)](https://github.com/libcheck/check/actions?query=workflow%3Alinux)
+[![OSX Build Status](https://github.com/libcheck/check/workflows/osx/badge.svg)](https://github.com/libcheck/check/actions?query=workflow%3Aosx)
+[![Windows Build Status](https://github.com/libcheck/check/workflows/windows/badge.svg)](https://github.com/libcheck/check/actions?query=workflow%3Awindows)
+
+</div>
+
+## Table of Contents
+ * [About](#about)
+ * [Installing](#installing)
+ * [Linking](#linking)
+ * [Packaging](#packaging)
+
+## About
 
 Check is a unit testing framework for C. It features a simple interface
 for defining unit tests, putting little in the way of the
@@ -14,7 +26,7 @@ source code editors and IDEs.
 See https://libcheck.github.io/check for more information, including a
 tutorial.  The tutorial is also available as `info check`.
 
-# Installation
+## Installing
 
 Check has the following dependencies:
 
@@ -28,20 +40,23 @@ Check has the following dependencies:
 
 The versions specified may be higher than those actually needed.
 
-## autoconf
+### autoconf
 
     $ autoreconf --install
     $ ./configure
     $ make
     $ make check
+    $ make install
+    $ sudo ldconfig
 
 in this directory to set everything up.  autoreconf calls all of the
 necessary tools for you, like autoconf, automake, autoheader, etc.  If
 you ever change something during development, run autoreconf again
 (without --install), and it will perform the minimum set of actions
-necessary.
+necessary.  Check is installed to `/usr/local/lib` by default. ldconfig rebuilds
+the linker cache so that newly installed library file is included in the cache.
 
-## cmake
+### cmake
 
     $ mkdir build
     $ cd build
@@ -49,9 +64,19 @@ necessary.
     $ make
     $ CTEST_OUTPUT_ON_FAILURE=1 make test
 
-# Linking against Check
+## Linking
 
 Check uses variadic macros in check.h, and the strict C90 options for
 gcc will complain about this.  In gcc 4.0 and above you can turn this
 off explicitly with `-Wno-variadic-macros`.  In a future API it would be
 nice to eliminate these macros.
+
+## Packaging
+
+Check is available packaged for the following operating systems:
+
+<div align="center">
+
+[![Packaging status](https://repology.org/badge/vertical-allrepos/check.svg)](https://repology.org/project/check/versions)
+
+</div>

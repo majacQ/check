@@ -77,7 +77,7 @@ static FILE *get_pipe(void)
         return send_file1;
     }
 
-    eprintf("No messaging setup", __FILE__, __LINE__);
+    eprintf("Unable to report test progress or a failure; was an ck_assert or ck_abort function called while not running tests?", __FILE__, __LINE__);
 
     return NULL;
 }
@@ -315,11 +315,19 @@ static void setup_pipe(void)
     if(send_file1 == NULL)
     {
         send_file1 = open_tmp_file(&send_file1_name);
+        if(send_file1 == NULL)
+        {
+            eprintf("Unable to create temporary file for communication; may not have permissions to do so", __FILE__, __LINE__ -3);
+        }
         return;
     }
     if(send_file2 == NULL)
     {
         send_file2 = open_tmp_file(&send_file2_name);
+        if(send_file2 == NULL)
+        {
+            eprintf("Unable to create temporary file for communication; may not have permissions to do so", __FILE__, __LINE__ -3);
+        }
         return;
     }
     eprintf("Only one nesting of suite runs supported", __FILE__, __LINE__);

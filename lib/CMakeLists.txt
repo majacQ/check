@@ -1,6 +1,7 @@
 #
 # Check: a unit test framework for C
 # Copyright (C) 2011 Mateusz Loskot
+# Copyright (C) 2020 Mikko Koivunalho
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -20,6 +21,8 @@
 
 
 set(SOURCES libcompat.c)
+
+set(SOURCES ${SOURCES} fpclassify.c)
 
 if (NOT HAVE_LIBRT)
   set(SOURCES ${SOURCES} clock_gettime.c)
@@ -60,14 +63,17 @@ if(NOT HAVE_DECL_STRSIGNAL)
   set(SOURCES ${SOURCES} strsignal.c)
 endif(NOT HAVE_DECL_STRSIGNAL)
 
+if(NOT HAVE_DECL_ALARM)
+  set(SOURCES ${SOURCES} alarm.c)
+endif(NOT HAVE_DECL_ALARM)
+
+if (NOT HAVE_PTHREAD)
+  set(SOURCES ${SOURCES} pthread_mutex.c)
+endif()
 
 set(HEADERS libcompat.h)
 
 add_library(compat STATIC ${SOURCES} ${HEADERS})
 
-install(TARGETS compat
-  RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib) 
+# vim: shiftwidth=2:softtabstop=2:tabstop=2:expandtab:autoindent
 
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/libcompat.h DESTINATION include)
