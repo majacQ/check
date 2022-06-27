@@ -20,7 +20,7 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 #
-cmake_minimum_required(VERSION 3.9 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 
 include(CheckCCompilerFlag)
 
@@ -439,8 +439,8 @@ if(NOT THIS_IS_SUBPROJECT)
   set(prefix_save "${PREFIX}")
   set(prefix "${CMAKE_INSTALL_PREFIX}")
   set(exec_prefix "\${prefix}")
-  set(libdir "\${exec_prefix}/lib")
-  set(includedir "\${prefix}/include")
+  set(libdir ${CMAKE_INSTALL_FULL_LIBDIR})
+  set(includedir ${CMAKE_INSTALL_FULL_INCLUDEDIR})
   set(VERSION "${PROJECT_VERSION}")
 
   if (HAVE_SUBUNIT)
@@ -489,6 +489,7 @@ endif()
 
 ###############################################################################
 # Subdirectories
+add_subdirectory(doc)
 add_subdirectory(lib)
 add_subdirectory(src)
 add_subdirectory(checkmk)
