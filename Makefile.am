@@ -2,7 +2,13 @@
 
 ## run tests after everything else
 
-SUBDIRS = lib src doc . checkmk tests
+if MAKE_DOCS
+OPTIONAL_DOC_TARGET = doc
+else
+OPTIONAL_DOC_TARGET =
+endif
+
+SUBDIRS = lib src $(OPTIONAL_DOC_TARGET) . checkmk tests
 
 ## FIXME: maybe we don't need this line
 
@@ -20,6 +26,7 @@ include_HEADERS = check_stdint.h
 
 EXTRA_DIST = check.pc.in $(m4data_DATA) xml/check_unittest.xslt \
 	CMakeLists.txt src/CMakeLists.txt tests/CMakeLists.txt lib/CMakeLists.txt \
+	checkmk/CMakeLists.txt \
 	cmake
 
 ## install docs

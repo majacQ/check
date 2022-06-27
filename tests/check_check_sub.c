@@ -778,7 +778,7 @@ START_TEST(test_ck_assert_float_eq_tol)
   y*=10.0f;
   t*=10.0f;
   ck_assert_float_eq_tol(x, y, t);
-  t/=10.0f;
+  t/=10.1f;
   record_failure_line_num(__LINE__);
   ck_assert_float_eq_tol(x, y, t);
 }
@@ -936,7 +936,7 @@ START_TEST(test_ck_assert_float_finite)
   record_test_name(tcase_name());
 
   ck_assert_float_finite(x);
-  // MS VS doesn't allow explicit division by zero
+  /* MS VS doesn't allow explicit division by zero */
   x = 1.0f / (1.0f - t);
   record_failure_line_num(__LINE__);
   ck_assert_float_finite(x);
@@ -1092,7 +1092,7 @@ END_TEST
 
 START_TEST(test_ck_assert_double_eq_with_promotion)
 {
-  float x = 0.1;
+  float x = 0.1F;
   double y = x;
 
   record_test_name(tcase_name());
@@ -1103,7 +1103,7 @@ END_TEST
 
 START_TEST(test_ck_assert_double_eq_with_conv)
 {
-  float x = 0.1;
+  float x = 0.1F;
 
   record_test_name(tcase_name());
 
@@ -1294,7 +1294,7 @@ START_TEST(test_ck_assert_double_eq_tol)
   y*=10;
   t*=10;
   ck_assert_double_eq_tol(x, y, t);
-  t/=10;
+  t/=10.1;
   record_failure_line_num(__LINE__);
   ck_assert_double_eq_tol(x, y, t);
 }
@@ -1452,7 +1452,7 @@ START_TEST(test_ck_assert_double_finite)
   record_test_name(tcase_name());
 
   ck_assert_double_finite(x);
-  // MS VS doesn't allow explicit division by zero
+  /* MS VS doesn't allow explicit division by zero */
   x = 1.0 / (1.0 - t);
   record_failure_line_num(__LINE__);
   ck_assert_double_finite(x);
@@ -1608,7 +1608,7 @@ END_TEST
 
 START_TEST(test_ck_assert_ldouble_eq_with_promotion)
 {
-  float x = 1.1;
+  float x = 1.1F;
   long double y = x;
 
   record_test_name(tcase_name());
@@ -1619,7 +1619,7 @@ END_TEST
 
 START_TEST(test_ck_assert_ldouble_eq_with_conv)
 {
-  float x = 1.1;
+  float x = 1.1F;
   long double y = x;
 
   record_test_name(tcase_name());
@@ -1812,7 +1812,7 @@ START_TEST(test_ck_assert_ldouble_eq_tol)
   y*=10.0l;
   t*=10.0l;
   ck_assert_ldouble_eq_tol(x, y, t);
-  t/=10.0l;
+  t/=10.1l;
   record_failure_line_num(__LINE__);
   ck_assert_ldouble_eq_tol(x, y, t);
 }
@@ -1970,7 +1970,7 @@ START_TEST(test_ck_assert_ldouble_finite)
   record_test_name(tcase_name());
 
   ck_assert_ldouble_finite(x);
-  // MS VS doesn't allow explicit division by zero
+  /* MS VS doesn't allow explicit division by zero */
   x = 1.0l / (1.0l - t);
   record_failure_line_num(__LINE__);
   ck_assert_ldouble_finite(x);
@@ -2677,7 +2677,7 @@ END_TEST
 
 /*
  * The following test will leak memory because it is calling
- * APIs inproperly. The leaked memory cannot be free'd, as
+ * APIs improperly. The leaked memory cannot be free'd, as
  * the methods to do so are static. (No user of Check should
  * call them directly).
  */

@@ -26,6 +26,10 @@
 #include <stdarg.h>
 #include <math.h>
 
+#if defined(HAVE_FORK) && HAVE_FORK==1
+#include <unistd.h>
+#endif /* HAVE_FORK */
+
 #include "check.h"
 #include "check_error.h"
 #include "check_list.h"
@@ -50,7 +54,7 @@ int check_micro_version = CHECK_MICRO_VERSION;
 
 const char* current_test_name = NULL;
 
-static int non_pass(int val);
+static int non_pass(enum test_result);
 static Fixture *fixture_create(SFun fun, int ischecked);
 static void tcase_add_fixture(TCase * tc, SFun setup, SFun teardown,
                               int ischecked);
@@ -74,7 +78,6 @@ Suite *suite_create(const char *name)
 int suite_tcase(Suite * s, const char *tcname)
 {
     List *l;
-    TCase *tc;
 
     if(s == NULL)
         return 0;
@@ -82,7 +85,7 @@ int suite_tcase(Suite * s, const char *tcname)
     l = s->tclst;
     for(check_list_front(l); !check_list_at_end(l); check_list_advance(l))
     {
-        tc = (TCase *)check_list_val(l);
+        TCase *tc = (TCase *)check_list_val(l);
         if(strcmp(tcname, tc->name) == 0)
             return 1;
     }
@@ -171,15 +174,15 @@ List *tag_string_to_list(const char *tags_string)
 
     if (NULL == tags_string)
     {
-	return list;
+        return list;
     }
 
     tags = strdup(tags_string);
     tag = strtok(tags, " ");
     while (tag)
     {
-	check_list_add_end(list, strdup(tag));
-	tag = strtok(NULL, " ");
+        check_list_add_end(list, strdup(tag));
+        tag = strtok(NULL, " ");
     }
     free(tags);
     return list;
@@ -190,8 +193,8 @@ void tcase_set_tags(TCase * tc, const char *tags_orig)
     /* replace any pre-existing list */
     if (tc->tags)
     {
-	check_list_apply(tc->tags, free);
-	check_list_free(tc->tags);
+        check_list_apply(tc->tags, free);
+        check_list_free(tc->tags);
     }
     tc->tags = tag_string_to_list(tags_orig);
 }
@@ -218,21 +221,21 @@ unsigned int tcase_matching_tag(TCase *tc, List *check_for)
 
     if (NULL == check_for)
     {
-	return 0;
+        return 0;
     }
 
     for(check_list_front(check_for); !check_list_at_end(check_for);
         check_list_advance(check_for))
     {
-	for(check_list_front(tc->tags); !check_list_at_end(tc->tags);
-	    check_list_advance(tc->tags))
-	{
-	    if (0 == strcmp((const char *)check_list_val(tc->tags),
-			    (const char *)check_list_val(check_for)))
-	    {
-		return 1;
-	    }
-	}
+        for(check_list_front(tc->tags); !check_list_at_end(tc->tags);
+            check_list_advance(tc->tags))
+        {
+            if (0 == strcmp((const char *)check_list_val(tc->tags),
+                    (const char *)check_list_val(check_for)))
+            {
+            return 1;
+            }
+        }
     }
     return 0;
 }
@@ -351,7 +354,7 @@ void tcase_fn_start(const char *fname, const char *file,
 
 const char* tcase_name(void)
 {
-	return current_test_name;
+    return current_test_name;
 }
 
 void _mark_point(const char *file, int line)
@@ -359,45 +362,58 @@ void _mark_point(const char *file, int line)
     send_loc_info(file, line);
 }
 
-void _ck_assert_failed(const char *file, int line, const char *expr, ...)
-{
-    const char *msg;
-    va_list ap;
-    char buf[BUFSIZ];
-    const char *to_send;
 
-    send_loc_info(file, line);
-
-    va_start(ap, expr);
-    msg = (const char *)va_arg(ap, char *);
-
-    /*
-     * If a message was passed, format it with vsnprintf.
-     * Otherwise, print the expression as is.
-     */
-    if(msg != NULL)
-    {
-        vsnprintf(buf, BUFSIZ, msg, ap);
-        to_send = buf;
-    }
-    else
-    {
-        to_send = expr;
-    }
-
-    va_end(ap);
-    send_failure_info(to_send);
-    if(cur_fork_status() == CK_FORK)
-    {
 #if defined(HAVE_FORK) && HAVE_FORK==1
-        _exit(1);
-#endif /* HAVE_FORK */
+#  define EXIT_IN_FAILURE() _exit(1)
+#else
+#  define EXIT_IN_FAILURE()
+#endif
+
+#define _ck_assert_failed_inner()\
+    char buf[BUFSIZ];\
+    const char *to_send;\
+\
+    send_loc_info(file, line);\
+\
+    /*\
+     * If a message was passed, format it with vsnprintf.\
+     * Otherwise, print the expression as is.\
+     */\
+    if(msg != NULL)\
+    {\
+        va_list ap;\
+        va_start(ap, msg);\
+        vsnprintf(buf, BUFSIZ, msg, ap);\
+        va_end(ap);\
+        to_send = buf;\
+    }\
+    else\
+    {\
+        to_send = expr;\
+    }\
+\
+    send_failure_info(to_send);\
+    if(cur_fork_status() == CK_FORK)\
+    {\
+      EXIT_IN_FAILURE();\
+    }\
+    else\
+    {\
+        longjmp(error_jmp_buffer, 1);\
     }
-    else
-    {
-        longjmp(error_jmp_buffer, 1);
-    }
+
+void _ck_assert_failed(const char *file, int line, const char *expr,
+                       const char *msg, ...)
+{
+   _ck_assert_failed_inner();
 }
+void _ck_assert_failed_ignore_printf_validation(const char *file, int line, const char *expr,
+                       const char *msg, ...)
+{
+   _ck_assert_failed_inner();
+}
+
+#undef EXIT_IN_FAILURE
 
 SRunner *srunner_create(Suite * s)
 {
@@ -438,7 +454,6 @@ void srunner_add_suite(SRunner * sr, Suite * s)
 void srunner_free(SRunner * sr)
 {
     List *l;
-    TestResult *tr;
 
     if(sr == NULL)
         return;
@@ -454,7 +469,7 @@ void srunner_free(SRunner * sr)
     l = sr->resultlst;
     for(check_list_front(l); !check_list_at_end(l); check_list_advance(l))
     {
-        tr = (TestResult *)check_list_val(l);
+        TestResult *tr = (TestResult *)check_list_val(l);
         tr_free(tr);
     }
     check_list_free(sr->resultlst);
@@ -510,7 +525,7 @@ TestResult **srunner_results(SRunner * sr)
     return trarray;
 }
 
-static int non_pass(int val)
+static int non_pass(enum test_result val)
 {
     return val != CK_PASS;
 }
@@ -601,8 +616,6 @@ clockid_t check_get_clockid()
 {
     static clockid_t clockid = -1;
 
-    if(clockid == -1)
-    {
 /*
  * Only check if we have librt available. Otherwise, the clockid
  * will be ignored anyway, as the clock_gettime() and
@@ -611,21 +624,20 @@ clockid_t check_get_clockid()
  * will result in an assert(0).
  */
 #ifdef HAVE_LIBRT
-        timer_t timerid;
+    timer_t timerid;
 
-        if(timer_create(CLOCK_MONOTONIC, NULL, &timerid) == 0)
-        {
-            timer_delete(timerid);
-            clockid = CLOCK_MONOTONIC;
-        }
-        else
-        {
-            clockid = CLOCK_REALTIME;
-        }
-#else
+    if(timer_create(CLOCK_MONOTONIC, NULL, &timerid) == 0)
+    {
+        timer_delete(timerid);
         clockid = CLOCK_MONOTONIC;
-#endif
     }
+    else
+    {
+        clockid = CLOCK_REALTIME;
+    }
+#else
+    clockid = CLOCK_MONOTONIC;
+#endif
 
     return clockid;
 }

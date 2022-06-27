@@ -25,25 +25,54 @@
 #include <config.h>
 #endif
 
-#if defined(__GNUC__) && defined(__GNUC_MINOR__)
-#define GCC_VERSION_AT_LEAST(major, minor) \
+/**
+ * __GNUC_PATCHLEVEL__ is new to GCC 3.0;
+ * it is also present in the widely-used development snapshots leading up to 3.0
+ * (which identify themselves as GCC 2.96 or 2.97, depending on which snapshot you have).
+ *
+ * https://stackoverflow.com/questions/1936719/what-are-the-gcc-predefined-macros-for-the-compilers-version-number/1936745#1936745
+ */
+
+#if defined(__GNUC__) && defined(__GNUC_MINOR__) && defined(__GNUC_PATCHLEVEL__)
+#define GCC_VERSION_AT_LEAST(major, minor, patch) \
+((__GNUC__ > (major)) || \
+ (__GNUC__ == (major) && __GNUC_MINOR__ > (minor)) || \
+ (__GNUC__ == (major) && __GNUC_MINOR__ == (minor) && __GNUC_PATCHLEVEL__ >= (patch)) )
+#elif defined(__GNUC__) && defined(__GNUC_MINOR__)
+#define GCC_VERSION_AT_LEAST(major, minor, patch) \
 ((__GNUC__ > (major)) || \
  (__GNUC__ == (major) && __GNUC_MINOR__ >= (minor)))
 #else
-#define GCC_VERSION_AT_LEAST(major, minor) 0
+#define GCC_VERSION_AT_LEAST(major, minor, patch) 0
 #endif
 
-#if GCC_VERSION_AT_LEAST(2,95)
+#if GCC_VERSION_AT_LEAST(2,95,3)
 #define CK_ATTRIBUTE_UNUSED __attribute__ ((unused))
+#define CK_ATTRIBUTE_FORMAT(a, b, c) __attribute__ ((format (a, b, c)))
 #else
 #define CK_ATTRIBUTE_UNUSED
+#define CK_ATTRIBUTE_FORMAT(a, b, c)
 #endif /* GCC 2.95 */
 
-#if GCC_VERSION_AT_LEAST(2,5)
+#if GCC_VERSION_AT_LEAST(2,5,0)
 #define CK_ATTRIBUTE_NORETURN __attribute__ ((noreturn))
 #else
 #define CK_ATTRIBUTE_NORETURN
 #endif /* GCC 2.5 */
+
+#if GCC_VERSION_AT_LEAST(4,7,4) && (__STDC_VERSION__ >= 199901L)
+/* Operator _Pragma introduced in C99 */
+#define CK_DIAGNOSTIC_STRINGIFY(x) #x
+#define CK_DIAGNOSTIC_HELPER1(y) CK_DIAGNOSTIC_STRINGIFY(GCC diagnostic ignored y)
+#define CK_DIAGNOSTIC_HELPER2(z) CK_DIAGNOSTIC_HELPER1(#z)
+#define CK_DIAGNOSTIC_PUSH_IGNORE(w) \
+    _Pragma("GCC diagnostic push") \
+    _Pragma(CK_DIAGNOSTIC_HELPER2(w))
+#define CK_DIAGNOSTIC_POP(w) _Pragma ("GCC diagnostic pop")
+#else
+#define CK_DIAGNOSTIC_PUSH_IGNORE(w)
+#define CK_DIAGNOSTIC_POP(w)
+#endif /* GCC 4.7.4 */
 
 /*
  * Used for MSVC to create the export attribute
@@ -59,6 +88,23 @@
 #include <io.h>                 /* read, write */
 #include <process.h>            /* getpid */
 #endif /* _MSC_VER */
+
+/*
+ * On some not so old version of Visual Studio (< 2015), or with mingw-w64 not
+ * supporting POSIX printf family function, use the size prefix specifiers
+ * in msvcrt.dll. See the following link for the list of the size prefix
+ * specifiers:
+ * https://docs.microsoft.com/en-us/cpp/c-runtime-library/format-specification-syntax-printf-and-wprintf-functions?view=vs-2019
+ */
+#ifdef _WIN32
+#define CK_FMT_ZU "%Iu"
+#define CK_FMT_ZD "%Id"
+#define CK_FMT_TD "%Id"
+#else
+#define CK_FMT_ZU "%zu"
+#define CK_FMT_ZD "%zd"
+#define CK_FMT_TD "%td"
+#endif
 
 /* defines size_t */
 #include <sys/types.h>
@@ -113,9 +159,31 @@ extern int fpclassify(double d);
 #include <sys/wait.h>
 #endif
 
+#if defined(HAVE_INIT_ONCE_BEGIN_INITIALIZE) && defined(HAVE_INIT_ONCE_COMPLETE)
+#define HAVE_WIN32_INIT_ONCE 1
+#endif
+
 /* declares pthread_create and friends */
-#ifdef HAVE_PTHREAD
+#if defined HAVE_PTHREAD
 #include <pthread.h>
+#elif defined HAVE_WIN32_INIT_ONCE
+typedef void pthread_mutexattr_t;
+
+typedef struct
+{
+    INIT_ONCE init;
+    HANDLE mutex;
+} pthread_mutex_t;
+
+#define PTHREAD_MUTEX_INITIALIZER { \
+    INIT_ONCE_STATIC_INIT, \
+    NULL, \
+}
+
+int pthread_mutex_init(pthread_mutex_t *mutex, pthread_mutexattr_t *attr);
+int pthread_mutex_destroy(pthread_mutex_t *mutex);
+int pthread_mutex_lock(pthread_mutex_t *mutex);
+int pthread_mutex_unlock(pthread_mutex_t *mutex);
 #endif
 
 #ifdef HAVE_STDINT_H

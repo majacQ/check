@@ -43,10 +43,10 @@ char * line_num_failures_file_name = NULL;
 
 enum ck_test_msg_type_t {
 #if ENABLE_REGEX
-  // For tests with different output on different platforms
+  /* For tests with different output on different platforms */
   CK_MSG_REGEXP,
 #endif
-  // Simple text
+  /* Simple text */
   CK_MSG_TEXT
 };
 
@@ -134,7 +134,7 @@ static master_test_t master_tests[] = {
   { "Simple Tests", "test_ck_assert_float_ge", CK_FAILURE, CK_MSG_TEXT, "Assertion 'x >= y' failed: x == 2.5, y == 3" },
   { "Simple Tests", "test_ck_assert_float_ge_with_mod", CK_FAILURE, CK_MSG_TEXT, "Assertion '2%d >= 3%f' failed: 2%d == 0, 3%f == 1" },
   { "Simple Tests", "test_ck_assert_float_with_expr", CK_PASS, CK_MSG_TEXT, "Passed" },
-  { "Simple Tests", "test_ck_assert_float_eq_tol", CK_FAILURE, CK_MSG_TEXT, "Assertion 'fabsl(y - x) < t' failed: x == 0.001, y == 0.003, t == 0.001" },
+  { "Simple Tests", "test_ck_assert_float_eq_tol", CK_FAILURE, CK_MSG_TEXT, "Assertion 'fabsl(y - x) < t' failed: x == 0.001, y == 0.003, t == 0.000990099" },
   { "Simple Tests", "test_ck_assert_float_eq_tol_with_mod", CK_FAILURE, CK_MSG_TEXT, "Assertion 'fabsl(2%f - 3%d) < 2%p' failed: 3%d == 1, 2%f == 0, 2%p == 0" },
   { "Simple Tests", "test_ck_assert_float_ne_tol", CK_FAILURE, CK_MSG_TEXT, "Assertion 'fabsl(y - x) >= t' failed: x == 0.001, y == 0.002, t == 0.01" },
   { "Simple Tests", "test_ck_assert_float_ne_tol_with_mod", CK_FAILURE, CK_MSG_TEXT, "Assertion 'fabsl(3%f - 3%d) >= 3%p' failed: 3%d == 1, 3%f == 1, 3%p == 1" },
@@ -174,7 +174,7 @@ static master_test_t master_tests[] = {
   { "Simple Tests", "test_ck_assert_double_ge", CK_FAILURE, CK_MSG_TEXT, "Assertion 'x >= y' failed: x == 2.5, y == 3" },
   { "Simple Tests", "test_ck_assert_double_ge_with_mod", CK_FAILURE, CK_MSG_TEXT, "Assertion '2%d >= 3%f' failed: 2%d == 0, 3%f == 1" },
   { "Simple Tests", "test_ck_assert_double_with_expr", CK_PASS, CK_MSG_TEXT, "Passed" },
-  { "Simple Tests", "test_ck_assert_double_eq_tol", CK_FAILURE, CK_MSG_TEXT, "Assertion 'fabsl(y - x) < t' failed: x == 0.001, y == 0.002, t == 0.001" },
+  { "Simple Tests", "test_ck_assert_double_eq_tol", CK_FAILURE, CK_MSG_TEXT, "Assertion 'fabsl(y - x) < t' failed: x == 0.001, y == 0.002, t == 0.000990099" },
   { "Simple Tests", "test_ck_assert_double_eq_tol_with_mod", CK_FAILURE, CK_MSG_TEXT, "Assertion 'fabsl(2%f - 3%d) < 2%p' failed: 3%d == 1, 2%f == 0, 2%p == 0" },
   { "Simple Tests", "test_ck_assert_double_ne_tol", CK_FAILURE, CK_MSG_TEXT, "Assertion 'fabsl(y - x) >= t' failed: x == 0.001, y == 0.002, t == 0.01" },
   { "Simple Tests", "test_ck_assert_double_ne_tol_with_mod", CK_FAILURE, CK_MSG_TEXT, "Assertion 'fabsl(3%f - 3%d) >= 3%p' failed: 3%d == 1, 3%f == 1, 3%p == 1" },
@@ -214,7 +214,7 @@ static master_test_t master_tests[] = {
   { "Simple Tests", "test_ck_assert_ldouble_ge", CK_FAILURE, CK_MSG_TEXT, "Assertion 'x >= y' failed: x == 2.5, y == 3" },
   { "Simple Tests", "test_ck_assert_ldouble_ge_with_mod", CK_FAILURE, CK_MSG_TEXT, "Assertion '2%d >= 3%f' failed: 2%d == 0, 3%f == 1" },
   { "Simple Tests", "test_ck_assert_ldouble_with_expr", CK_PASS, CK_MSG_TEXT, "Passed" },
-  { "Simple Tests", "test_ck_assert_ldouble_eq_tol", CK_FAILURE, CK_MSG_TEXT, "Assertion 'fabsl(y - x) < t' failed: x == 0.001, y == 0.002, t == 0.001" },
+  { "Simple Tests", "test_ck_assert_ldouble_eq_tol", CK_FAILURE, CK_MSG_TEXT, "Assertion 'fabsl(y - x) < t' failed: x == 0.001, y == 0.002, t == 0.000990099" },
   { "Simple Tests", "test_ck_assert_ldouble_eq_tol_with_mod", CK_FAILURE, CK_MSG_TEXT, "Assertion 'fabsl(2%f - 3%d) < 2%p' failed: 3%d == 1, 2%f == 0, 2%p == 0" },
   { "Simple Tests", "test_ck_assert_ldouble_ne_tol", CK_FAILURE, CK_MSG_TEXT, "Assertion 'fabsl(y - x) >= t' failed: x == 0.001, y == 0.002, t == 0.01" },
   { "Simple Tests", "test_ck_assert_ldouble_ne_tol_with_mod", CK_FAILURE, CK_MSG_TEXT, "Assertion 'fabsl(3%f - 3%d) >= 3%p' failed: 3%d == 1, 3%f == 1, 3%p == 1" },
@@ -416,16 +416,16 @@ static int nr_of_master_tests = sizeof master_tests /sizeof master_tests[0];
 START_TEST(test_check_nfailures)
 {
   int i;
-  int failed = 0;
+  int number_failed = 0;
   
   for (i = 0; i < nr_of_master_tests; i++) {
     if (master_tests[i].failure_type != CK_PASS) {
-      failed++;
+      number_failed++;
     }
   }
-  ck_assert_msg (sub_nfailed == failed,
+  ck_assert_msg (sub_nfailed == number_failed,
                "Unexpected number of failures received, %d, expected %d.",
-               sub_nfailed, failed);
+               sub_nfailed, number_failed);
 }
 END_TEST
 
@@ -436,36 +436,6 @@ START_TEST(test_check_ntests_run)
 }
 END_TEST
 
-/**
- * Given a string, return a new string that is a copy
- * of the original exception that every occurance of
- * % is replaced with %%. This escapes the %
- * symbol for passing to printf.
- *
- * The passed in string is not modified. Note though
- * that the returned string is allocated memory that
- * must be freed by the caller.
- */
-char * escape_percent(const char *original, size_t original_size);
-char * escape_percent(const char *original, size_t original_size)
-{
-  /* In the worst case every character is a %*/
-  char *result = (char*)malloc(original_size*2);
-
-  size_t read_index;
-  size_t write_index;
-  for(read_index = write_index = 0; read_index < original_size; read_index++, write_index++)
-  {
-    result[write_index] = original[read_index];
-    if(result[write_index] == '%')
-    {
-      /* Place a duplicate % next to the one just read, to escape it */
-      result[++write_index] = '%';
-    }
-  }
-
-  return result;
-}
 
 START_TEST(test_check_failure_msgs)
 {
@@ -474,9 +444,7 @@ START_TEST(test_check_failure_msgs)
   const char *got_msg;
   const char *expected_msg;
   unsigned char not_equal = 0;
-  char emsg[MAXSTR];
   const char *msg_type_str;
-  char *emsg_escaped;
   int reg_err;
   char err_text[256];
   TestResult *tr;
@@ -499,29 +467,32 @@ START_TEST(test_check_failure_msgs)
     expected_msg = master_test->msg;
 
     switch (master_test->msg_type) {
-    case CK_MSG_TEXT:
-      if (strcmp(got_msg, expected_msg) != 0) {
-        not_equal = 1;
-      }
-      break;
+      case CK_MSG_TEXT:
+        if (strcmp(got_msg, expected_msg) != 0) {
+          not_equal = 1;
+        }
+        break;
 #if ENABLE_REGEX
-    case CK_MSG_REGEXP: {
-      reg_err = regcomp(&re, expected_msg, REG_EXTENDED | REG_NOSUB);
-      if (reg_err) {        
-        regerror(reg_err, &re, err_text, sizeof(err_text));
-        ck_assert_msg(reg_err == 0,
-                "For test %d:%s:%s Expected regexp '%s', but regcomp returned error '%s'",
-                i, master_test->tcname, master_test->test_name, expected_msg,
-                err_text);
+      case CK_MSG_REGEXP: {
+        reg_err = regcomp(&re, expected_msg, REG_EXTENDED | REG_NOSUB);
+        if (reg_err) {        
+          regerror(reg_err, &re, err_text, sizeof(err_text));
+          ck_assert_msg(reg_err == 0,
+                  "For test %d:%s:%s Expected regexp '%s', but regcomp returned error '%s'",
+                  i, master_test->tcname, master_test->test_name, expected_msg,
+                  err_text);
+        }
+        reg_err = regexec(&re, got_msg, 0, NULL, 0);
+        regfree(&re);
+        if (reg_err) {
+          not_equal = 1;
+        }
+        break;
       }
-      reg_err = regexec(&re, got_msg, 0, NULL, 0);
-      regfree(&re);
-      if (reg_err) {
-        not_equal = 1;
-      }
-      break;
-    }
 #endif /* ENABLE_REGEX */
+      default:
+        /* Program should not reach here */
+        break;
     }
     
     if (not_equal) {      
@@ -535,21 +506,9 @@ START_TEST(test_check_failure_msgs)
         msg_type_str = "";
       }
 
-      snprintf(emsg, MAXSTR - 1,"For test %d:%s:%s Expected%s '%s', got '%s'",
+      ck_abort_msg("For test %d:%s:%s Expected%s '%s', got '%s'",
                i, master_test->tcname, master_test->test_name, msg_type_str,
                expected_msg, got_msg);
-      emsg[MAXSTR - 1] = '\0';
-
-      /*
-       * NOTE: ck_abort_msg() will take the passed string
-       * and feed it to printf. We need to escape any
-       * '%' found, else they will result in odd formatting
-       * in ck_abort_msg().
-       */
-      emsg_escaped = escape_percent(emsg, MAXSTR);
-
-      ck_abort_msg(emsg_escaped);
-      free(emsg_escaped);
     }
   }
 }
@@ -558,9 +517,9 @@ END_TEST
 START_TEST(test_check_failure_lnos)
 {
   int i;
-  int line_no;
+  long line_no;
   int passed = 0;
-  int failed;
+  int number_failed;
   TestResult *tr;
   
   /* Create list of line numbers where failures occurred */
@@ -572,29 +531,29 @@ START_TEST(test_check_failure_lnos)
       continue;
     }
 
-    failed = i - passed;
+    number_failed = i - passed;
 
     ck_assert_msg(i - passed <= sub_nfailed, NULL);
-    tr = tr_fail_array[failed];
+    tr = tr_fail_array[number_failed];
     ck_assert_msg(tr != NULL, NULL);
     line_no = get_next_failure_line_num(line_num_failures);
 
     if(line_no == -1)
     {
       ck_abort_msg("Did not find the %dth failure line number for suite %s, msg %s",
-        (failed+1), tr_tcname(tr), tr_msg(tr));
+        (number_failed+1), tr_tcname(tr), tr_msg(tr));
     }
 
     if (line_no > 0 && tr_lno(tr) != line_no) {
-      ck_abort_msg("For test %d (failure %d): Expected lno %d, got %d for suite %s, msg %s",
-               i, failed, line_no, tr_lno(tr), tr_tcname(tr), tr_msg(tr));
+      ck_abort_msg("For test %d (failure %d): Expected lno %ld, got %d for suite %s, msg %s",
+               i, number_failed, line_no, tr_lno(tr), tr_tcname(tr), tr_msg(tr));
     }    
   }
 
   /* At this point, there should be no remaining failures */
   line_no = get_next_failure_line_num(line_num_failures);
   ck_assert_msg(line_no == -1,
-    "No more failure line numbers expected, but found %d", line_no);
+    "No more failure line numbers expected, but found %ld", line_no);
 }
 END_TEST
 
@@ -615,7 +574,7 @@ START_TEST(test_check_failure_ftypes)
     ck_assert_msg(tr != NULL, NULL);
     ck_assert_msg(master_tests[i].failure_type == tr_rtype(tr),
                 "Failure type wrong for test %d:%s:%s",
-				i, master_tests[i].tcname, master_tests[i].test_name);
+                i, master_tests[i].tcname, master_tests[i].test_name);
   }
 }
 END_TEST
@@ -629,7 +588,7 @@ START_TEST(test_check_failure_lfiles)
     ck_assert_msg(tr_lfile(tr) != NULL, "Bad file name for test %d", i);
     ck_assert_msg(strstr(tr_lfile(tr), "check_check_sub.c") != 0,
                 "Bad file name for test %d:%s:%s",
-				i, master_tests[i].tcname, master_tests[i].test_name);
+                i, master_tests[i].tcname, master_tests[i].test_name);
   }
 }
 END_TEST
@@ -641,7 +600,7 @@ START_TEST(test_check_tcnames)
   if (strcmp(tcname, master_tests[_i].tcname) != 0) {
     ck_abort_msg("Expected '%s', got '%s' for test %d:%s",
          master_tests[_i].tcname, tcname,
-	     _i, master_tests[_i].test_name);
+         _i, master_tests[_i].test_name);
   } 
 }
 END_TEST
@@ -649,26 +608,22 @@ END_TEST
 START_TEST(test_check_test_names)
 {
   int i;
-  int line_no;
-  int passed = 0;
-  int failed;
-  TestResult *tr;
 
   rewind(test_names_file);
 
   for (i = 0; i < sub_ntests; i++)
   {
-	  char* test_name = get_next_test_name(test_names_file);
+      char* test_name = get_next_test_name(test_names_file);
 
-	  if(test_name == NULL || strcmp(master_tests[i].test_name, test_name) != 0)
-	  {
-		  ck_abort_msg("Expected test name '%s' but found '%s' for test %d:%s",
-				  master_tests[i].test_name,
-				  (test_name == NULL ? "(null)" : test_name),
-				  i, master_tests[i].tcname);
-	  }
+      if(test_name == NULL || strcmp(master_tests[i].test_name, test_name) != 0)
+      {
+          ck_abort_msg("Expected test name '%s' but found '%s' for test %d:%s",
+                  master_tests[i].test_name,
+                  (test_name == NULL ? "(null)" : test_name),
+                  i, master_tests[i].tcname);
+      }
 
-	  free(test_name);
+      free(test_name);
   }
 }
 END_TEST
@@ -678,43 +633,43 @@ START_TEST(test_check_all_msgs)
   const char *got_msg = tr_msg(tr_all_array[_i]);
   master_test_t *master_test = &master_tests[_i];
   const char *expected_msg = master_test->msg;
-  char emsg[MAXSTR];
-  const char *msg_type_str;
-  char err_text[256];
-  int reg_err;
   unsigned char not_equal = 0;
-  char *emsg_escaped;
 #if ENABLE_REGEX
   regex_t re;
 #endif
 
   switch (master_test->msg_type) {
-  case CK_MSG_TEXT:
-    if (strcmp(got_msg, expected_msg) != 0) {
-      not_equal = 1;
-    }
-    break;
+    case CK_MSG_TEXT:
+      if (strcmp(got_msg, expected_msg) != 0) {
+        not_equal = 1;
+      }
+      break;
 #if ENABLE_REGEX
-  case CK_MSG_REGEXP: {
-    reg_err = regcomp(&re, expected_msg, REG_EXTENDED | REG_NOSUB);
-    if (reg_err) {      
-      regerror(reg_err, &re, err_text, sizeof(err_text));
-      ck_assert_msg(reg_err == 0,
-                "For test %d:%s:%s Expected regexp '%s', but regcomp returned error '%s'",
-                _i, master_test->tcname, master_test->test_name, expected_msg,
-                err_text);
+    case CK_MSG_REGEXP: {
+      int reg_err = regcomp(&re, expected_msg, REG_EXTENDED | REG_NOSUB);
+      if (reg_err) {      
+        char err_text[256];
+        regerror(reg_err, &re, err_text, sizeof(err_text));
+        ck_assert_msg(reg_err == 0,
+                  "For test %d:%s:%s Expected regexp '%s', but regcomp returned error '%s'",
+                  _i, master_test->tcname, master_test->test_name, expected_msg,
+                  err_text);
+      }
+      reg_err = regexec(&re, got_msg, 0, NULL, 0);
+      regfree(&re);
+      if (reg_err) {
+        not_equal = 1;
+      }
+      break;
     }
-    reg_err = regexec(&re, got_msg, 0, NULL, 0);
-    regfree(&re);
-    if (reg_err) {
-      not_equal = 1;
-    }
-    break;
-  }
 #endif /* ENABLE_REGEX */
+    default:
+      /* Program should not reach here */
+      break;
   }
 
   if (not_equal) {    
+    const char *msg_type_str;
     switch(master_test->msg_type) {
 #if ENABLE_REGEX
     case CK_MSG_REGEXP:
@@ -725,21 +680,9 @@ START_TEST(test_check_all_msgs)
       msg_type_str = "";
     }
 
-    snprintf(emsg, MAXSTR - 1, "For test %i:%s:%s expected%s '%s', got '%s'",
-             _i, master_test->tcname, master_test->test_name, msg_type_str,
-             expected_msg, got_msg);
-    emsg[MAXSTR - 1] = '\0';
-
-   /*
-    * NOTE: ck_abort_msg() will take the passed string
-    * and feed it to printf. We need to escape any
-    * '%' found, else they will result in odd formatting
-    * in ck_abort_msg().
-    */
-    emsg_escaped = escape_percent(emsg, MAXSTR);
-
-    ck_abort_msg(emsg_escaped);
-    free(emsg_escaped);
+    ck_abort_msg("For test %i:%s:%s expected%s '%s', got '%s'",
+       _i, master_test->tcname, master_test->test_name, msg_type_str,
+       expected_msg, got_msg);
   }
 }
 END_TEST  
@@ -748,8 +691,8 @@ START_TEST(test_check_all_ftypes)
 {
   ck_assert_msg(master_tests[_i].failure_type == tr_rtype(tr_all_array[_i]),
               "For test %d:%s:%s failure type wrong, expected %d but got %d",
-			  _i, master_tests[_i].tcname, master_tests[_i].test_name,
-			  master_tests[_i].failure_type, tr_rtype(tr_all_array[_i]));
+              _i, master_tests[_i].tcname, master_tests[_i].test_name,
+              master_tests[_i].failure_type, tr_rtype(tr_all_array[_i]));
 }
 END_TEST
 
@@ -762,7 +705,7 @@ static void test_fixture_setup(void)
 START_TEST(test_setup)
 {
   ck_assert_msg (test_fixture_val == 1,
-	       "Value not setup or changed across tests correctly");
+               "Value not setup or changed across tests correctly");
   test_fixture_val = 2;
 }
 END_TEST
@@ -775,7 +718,7 @@ static void test_fixture_teardown (void)
 START_TEST(test_teardown)
 {
   ck_assert_msg (test_fixture_val == 3,
-	       "Value not changed correctly in teardown");
+                "Value not changed correctly in teardown");
 }
 END_TEST  
 
@@ -802,7 +745,7 @@ Suite *make_master_suite (void)
   tcase_add_loop_test (tc_core, test_check_all_msgs, 0, sub_ntests);
   tcase_add_loop_test (tc_core, test_check_all_ftypes, 0, nr_of_master_tests);
   tcase_add_unchecked_fixture(tc_fixture, test_fixture_setup,
-			      test_fixture_teardown);
+                              test_fixture_teardown);
   /* add the test 3 times to make sure we adequately test
      preservation of fixture values across tests, regardless
      of the order in which tests are added to the test case */
@@ -923,7 +866,7 @@ char* get_next_test_name(FILE * file)
    */
   if(written > 0 && line[written-1] == '\n')
   {
-	  line[written-1] = '\0';
+      line[written-1] = '\0';
   }
 
   return line;
@@ -931,9 +874,9 @@ char* get_next_test_name(FILE * file)
 
 void record_failure_line_num(int linenum)
 {
-  int to_write;
-  ssize_t written;
-  int result;
+  size_t to_write;
+  size_t written;
+  int result, chars_printed;
   char string[16];
 
   /*
@@ -942,12 +885,13 @@ void record_failure_line_num(int linenum)
    */
    linenum += 1;
 
-  to_write = snprintf(string, sizeof(string), "%d\n", linenum);
-  if(to_write <= 0)
+  chars_printed = snprintf(string, sizeof(string), "%d\n", linenum);
+  if(chars_printed <= 0 || (size_t) chars_printed >= sizeof(string))
   {
     fprintf(stderr, "%s:%d: Error in call to snprintf:", __FILE__, __LINE__);
     exit(1);
   }
+  to_write = (size_t) chars_printed;
 
   if(line_num_failures == NULL)
   {
@@ -964,7 +908,7 @@ void record_failure_line_num(int linenum)
   written = fwrite(string, 1, to_write, line_num_failures);
   if(written != to_write)
   {
-    fprintf(stderr, "%s:%d: Error in call to fwrite, wrote %ld instead of %d:", __FILE__, __LINE__, written, to_write);
+    fprintf(stderr, "%s:%d: Error in call to fwrite, wrote " CK_FMT_ZD " instead of " CK_FMT_ZU ":", __FILE__, __LINE__, written, to_write);
     exit(1);
   }
 
@@ -976,13 +920,13 @@ void record_failure_line_num(int linenum)
   }
 }
 
-int get_next_failure_line_num(FILE * file)
+long get_next_failure_line_num(FILE * file)
 {
   char * line = NULL;
   char * end = NULL;
   size_t length;
   ssize_t written;
-  int value = -1;
+  long value = -1;
 
   written = getline(&line, &length, file);
 
